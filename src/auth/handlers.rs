@@ -1,34 +1,39 @@
 use crate::auth::models::{AuthResponse, LoginRequest, RegisterRequest};
 use crate::auth::services::{generate_jwt, hash_password, verify_password};
-use actix_web::{web, HttpResponse};
+use actix_web::{post, web, HttpResponse};
+use log::error;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
+#[post("/register")]
 pub async fn register(
     pool: web::Data<PgPool>,
     req: web::Json<RegisterRequest>,
 ) -> HttpResponse {
-    let hashed_password = match hash_password(&req.password) {
-        Ok(hash) => hash,
-        Err(_) => return HttpResponse::InternalServerError().finish(),
-    };
+    // let hashed_password = match hash_password(&req.password) {
+    //     Ok(hash) => hash,
+    //     Err(e) => {
+    //         error!("{}", e);
+    //         return HttpResponse::InternalServerError().finish()
+    //     }
+    // };
 
-    let query = "INSERT INTO users (id, email, password) VALUES ($1, $2, $3)";
-    let user_id = Uuid::new_v4();
+    let query = "INSERT INTO users (email, password) VALUES ($1, $2)";
 
-    if let Err(_) = sqlx::query(query)
-        .bind(user_id)
+    if let Err(e) = sqlx::query(query)
         .bind(&req.email)
-        .bind(hashed_password)
+        .bind("33")
         .execute(pool.get_ref())
         .await
     {
+        error!("{}", e);
         return HttpResponse::InternalServerError().finish();
     }
 
     HttpResponse::Ok().finish()
 }
 
+#[post("/login")]
 pub async fn login(
     pool: web::Data<PgPool>,
     req: web::Json<LoginRequest>,

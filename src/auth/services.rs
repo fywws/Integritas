@@ -1,9 +1,7 @@
-use std::cell::OnceCell;
 use std::sync::LazyLock;
 use crate::config::jwt_secret;
 use argon2::{password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString}, Argon2};
 use dotenvy::var;
-use rand_core::OsRng;
 use jsonwebtoken::{encode, Header, EncodingKey};
 use serde::{Deserialize, Serialize};
 
